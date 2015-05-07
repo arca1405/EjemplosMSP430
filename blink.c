@@ -1,38 +1,24 @@
-//***************************************************************************************
-//  MSP430 Blink the LED Demo - Software Toggle P1.0
-//
-//  Description; Toggle P1.0 by xor'ing P1.0 inside of a software loop.
-//  ACLK = n/a, MCLK = SMCLK = default DCO
-//
-//                MSP430x5xx
-//             -----------------
-//         /|\|              XIN|-
-//          | |                 |
-//          --|RST          XOUT|-
-//            |                 |
-//            |             P1.0|-->LED
-//
-//  J. Stevenson
-//  Texas Instruments, Inc
-//  July 2011
-//  Built with Code Composer Studio v5
-//***************************************************************************************
+#include <msp430g2553.h>
 
-#include <msp430.h>				
+#define LED_Verde 0x40					// BIT6
 
-int main(void) {
-	WDTCTL = WDTPW | WDTHOLD;		// Stop watchdog timer
-	P1DIR |= 0x01;					// Set P1.0 to output direction
+void main(void)
+{
+	WDTCTL = WDTPW + WDTHOLD; 			// Stop watchdog timer
 
-	for(;;) {
-		volatile unsigned int i;	// volatile to prevent optimization
+	P1DIR |= LED_Verde; 					// Set P1.6 to output direction
+	P1OUT &= ~LED_Verde; 				// Set green LED off
 
-		P1OUT ^= 0x01;				// Toggle P1.0 using exclusive-OR
+	//P1REN |= 0x08;						// Enable Port P1.3 (push button) pull-up resistor
+	P1SEL &= ~0x08;					     // Select Port 1 P1.3 (push button)
+    P1DIR &= ~0x08;					// Port 1 P1.3 (push button) as input, 0 is input
 
-		i = 10000;					// SW Delay
-		do i--;
-		while(i != 0);
+
+	while(1){
+		if ( (P1IN & BIT3) == 0)
+			P1OUT |= LED_Verde;
+
+		else
+			P1OUT &= ~LED_Verde;
 	}
-	
-	return 0;
 }
